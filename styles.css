@@ -1,0 +1,385 @@
+/* ========================
+   1. Variables CSS
+   ======================== */
+:root {
+    /* Palette de couleurs */
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --primary-color: #1db954;
+    --secondary-color: #bb86fc;
+    --accent-color: #03dac6;
+    --header-bg-color: #1f1f1f;
+    --menu-hover-bg: #333333;
+    --modal-bg-color: rgba(0, 0, 0, 0.85);
+    --border-color: #303030;
+
+    /* Typographie */
+    --font-family: 'Roboto', sans-serif;
+    --font-size-base: 16px;
+    --font-size-large: 24px;
+    --font-size-small: 14px;
+
+    /* Espacements */
+    --spacing-small: 8px;
+    --spacing-medium: 5px; /* Espacement réduit */
+    --spacing-large: 24px;
+
+    /* Ombres */
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================
+   2. Styles Généraux
+   ======================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: var(--spacing-large);
+    line-height: 1.6;
+}
+
+h1, h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-large);
+    font-weight: 500;
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+h2:hover {
+    color: var(--primary-color);
+}
+
+/* ========================
+   3. Header avec Menu Horizontal
+   ======================== */
+header {
+    background-color: var(--header-bg-color);
+    padding: var(--spacing-medium);
+    color: var(--text-color);
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-medium);
+    list-style: none;
+}
+
+.menu a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: var(--spacing-small) var(--spacing-medium);
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: 500;
+}
+
+.menu a:hover {
+    background-color: var(--menu-hover-bg);
+    color: var(--primary-color);
+}
+
+/* ========================
+   4. Galerie d'Images
+   ======================== */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); /* 8 colonnes fixes */
+    gap: var(--spacing-medium);
+    justify-items: center;
+    margin-top: var(--spacing-large);
+    max-width: 100%;
+}
+
+.gallery img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border: 3px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+    object-fit: cover;
+}
+
+.gallery img:hover {
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+}
+
+/* ========================
+   5. Modale (Lightbox)
+   ======================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--modal-bg-color);
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-medium);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal img {
+    max-width: 90%;
+    max-height: 80%;
+    border: 4px solid var(--accent-color);
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.modal img:hover {
+    transform: scale(1.02);
+}
+
+.close {
+    position: absolute;
+    top: var(--spacing-small);
+    right: var(--spacing-small);
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--primary-color);
+}
+
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.nav-arrow:hover {
+    color: var(--primary-color);
+}
+
+.prev {
+    left: var(--spacing-medium);
+}
+
+.next {
+    right: var(--spacing-medium);
+}
+
+.image-name {
+    color: #e0e0e0;
+    position: absolute;
+    bottom: var(--spacing-small);
+    font-size: 1.2rem;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+/* ========================
+   6. Liens et Boutons
+   ======================== */
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: var(--spacing-large);
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--accent-color);
+}
+
+/* ========================
+   7. Accessibilité et Focus
+   ======================== */
+a:focus, button:focus, .close:focus, .nav-arrow:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* ========================
+   8. Animations
+   ======================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========================
+   9. Responsive Design
+   ======================== */
+
+/* Très grands écrans (min-width: 2000px) */
+@media screen and (min-width: 2000px) {
+    .gallery {
+        grid-template-columns: repeat(8, 1fr);
+    }
+    .gallery img {
+        max-width: 400px;
+    }
+}
+
+/* Écrans larges (1600px à 1999px) */
+@media screen and (min-width: 1600px) and (max-width: 1999px) {
+    .gallery {
+        grid-template-columns: repeat(8, 1fr);
+    }
+    .gallery img {
+        max-width: 350px;
+    }
+}
+
+/* Écrans moyens (1200px à 1599px) */
+@media screen and (min-width: 1200px) and (max-width: 1599px) {
+    .gallery {
+        grid-template-columns: repeat(8, 1fr);
+    }
+    .gallery img {
+        max-width: 300px;
+    }
+}
+
+/* Écrans petits (992px à 1199px) */
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+    .gallery {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    .gallery img {
+        max-width: 300px;
+    }
+}
+
+/* Écrans encore plus petits (768px à 991px) */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+    .gallery {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .gallery img {
+        max-width: 350px;
+    }
+}
+
+/* Écrans très petits (moins de 768px) */
+@media screen and (max-width: 767px) {
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .gallery img {
+        max-width: 150px;
+    }
+    body {
+        padding: var(--spacing-small);
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.3rem;
+    }
+    .modal img {
+        max-height: 50%;
+        max-width: 90%;
+    }
+    .nav-arrow {
+        font-size: 2.5rem;
+        top: 50%;                     /* Centrage vertical */
+        transform: translateY(-50%);  /* Centrage vertical précis */
+    }
+    .prev {
+        left: 5%;
+    }
+    .next {
+        right: 5%;
+    }
+    .close {
+        font-size: 1.5rem;
+    }
+    .back-link {
+        font-size: 1rem;
+    }
+}
+/* ========================
+   10. Boutons de Like
+   ======================== */
+.like-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.like-container button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: var(--spacing-small) var(--spacing-medium);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.like-container button:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+.like-container button:active {
+    transform: scale(0.95);
+}
+
+.like-container span {
+    display: block;
+    font-size: 1rem;
+    margin-top: var(--spacing-small);
+    color: var(--text-color);
+}
