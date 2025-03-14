@@ -1,144 +1,151 @@
 <?php
-// Include the access-test.php file to check user login
-include('access-test.php'); // Checks if the user is logged in
+// (1) Check user access (optional)
+include('access-test.php');
 
-// Include the header.php
+// (2) Include header (optional)
 include('header.php');
 
-// Define the image and thumbnail folders
-$imageFolder = 'images'; 
-$thumbnailsFolder = 'images/thumbnails'; // Thumbnail folder
+// (3) Database connection
+require 'db_config.php';
 
-// Connect to the database
-require 'db_config.php'; // Ensure you have this file for the database connection
+// (4) Folders for images
+$imageFolder = 'images';
+$thumbnailsFolder = 'images/thumbnails';
 
-// Fetch data from the database (categories and images)
+// (5) Retrieve all images, categories, and like counts
 try {
     $stmt = $pdo->query("
-        SELECT categories.name AS category, images.file_name
-        FROM categories
-        JOIN images ON categories.id = images.category_id
-        ORDER BY categories.name
+        SELECT
+            i.id AS image_id,
+            i.file_name,
+            c.name AS category,
+            (SELECT COUNT(*) FROM image_likes WHERE image_id = i.id) AS total_likes
+        FROM images i
+        JOIN categories c ON i.category_id = c.id
+        ORDER BY c.name, i.id DESC
     ");
-
-    $groupedImages = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $groupedImages[$row['category']][] = $row['file_name'];
-    }
+    $allRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die('Database error: ' . $e->getMessage());
+    die('Database Error: ' . htmlspecialchars($e->getMessage()));
 }
 
-// Check if there are any categories
-if (empty($groupedImages)) {
-    die('No categories found in the database.');
+// (6) Group results by category for HTML display
+$groupedData = [];
+foreach ($allRows as $row) {
+    $cat = $row['category'];
+    if (!isset($groupedData[$cat])) {
+        $groupedData[$cat] = [];
+    }
+    $groupedData[$cat][] = $row;
 }
 
-// Function to create a thumbnail
-function createThumbnail($originalImagePath, $thumbnailPath, $thumbWidth = 250) {
-    if (!file_exists($originalImagePath)) {
-        echo "Image not found: $originalImagePath<br>";
-        return;
+// (7) Build "groupedImages" array for the modal
+//     In modal.php, openModal() expects a JS object: groupedImages["CategoryName"] = [ "file1.jpg", "file2.jpg", ... ]
+$groupedImages = [];
+foreach ($groupedData as $catName => $list) {
+    $fileNames = [];
+    foreach ($list as $item) {
+        $fileNames[] = $item['file_name'];
     }
-
-    list($width, $height) = getimagesize($originalImagePath);
-    $thumbHeight = floor($height * ($thumbWidth / $width));
-    $thumbnail = imagecreatetruecolor($thumbWidth, $thumbHeight);
-    $imageExtension = strtolower(pathinfo($originalImagePath, PATHINFO_EXTENSION));
-
-    // Handle transparency for PNG and GIF
-    if (in_array($imageExtension, ['png', 'gif'])) {
-        imagecolortransparent($thumbnail, imagecolorallocatealpha($thumbnail, 0, 0, 0, 127));
-        imagealphablending($thumbnail, false);
-        imagesavealpha($thumbnail, true);
-    }
-
-    if ($imageExtension == 'jpg' || $imageExtension == 'jpeg') {
-        $source = imagecreatefromjpeg($originalImagePath);
-    } elseif ($imageExtension == 'png') {
-        $source = imagecreatefrompng($originalImagePath);
-    } elseif ($imageExtension == 'gif') {
-        $source = imagecreatefromgif($originalImagePath);
-    } else {
-        echo "Unsupported file type: $imageExtension<br>";
-        return;
-    }
-
-    imagecopyresampled($thumbnail, $source, 0, 0, 0, 0, $thumbWidth, $thumbHeight, $width, $height);
-    if ($imageExtension == 'jpg' || $imageExtension == 'jpeg') {
-        imagejpeg($thumbnail, $thumbnailPath, 90);
-    } elseif ($imageExtension == 'png') {
-        imagepng($thumbnail, $thumbnailPath, 8);
-    } elseif ($imageExtension == 'gif') {
-        imagegif($thumbnail, $thumbnailPath);
-    }
-
-    imagedestroy($source);
-    imagedestroy($thumbnail);
-}
-
-// Create the thumbnail folder if it does not exist
-if (!is_dir($thumbnailsFolder)) {
-    mkdir($thumbnailsFolder, 0755, true);
-}
-
-// Create thumbnails for each image
-foreach ($groupedImages as $categoryName => $categoryImages) {
-    foreach ($categoryImages as $image) {
-        $safeImage = basename($image);
-        $imagePath = "$imageFolder/" . $safeImage;
-        $thumbnailPath = "$thumbnailsFolder/" . $safeImage;
-        
-        if (!file_exists($thumbnailPath)) {
-            createThumbnail($imagePath, $thumbnailPath);
-        }
-    }
+    $groupedImages[$catName] = $fileNames;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HansplaastAi</title>
+    <title>HansplaastAi (Index)</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>HansplaastAi</h1>
 
-    <?php
-    // Display images grouped by model
-    if (!empty($groupedImages)) {
-        foreach ($groupedImages as $categoryName => $categoryImages) {
-            $imageCount = count($categoryImages);
-            $limitedImages = $imageCount > 8 ? array_slice($categoryImages, -8) : $categoryImages;
-            $limitedImages = array_reverse($limitedImages);
+<h1>HansplaastAi - Index</h1>
 
-            echo "<h2><a href='model-detail.php?model=" . urlencode($categoryName) . "'>Model: " . htmlspecialchars($categoryName, ENT_QUOTES, 'UTF-8') . " (Total images: " . $imageCount . ")</a></h2>";
-            echo "<div class='gallery'>";
-            foreach ($limitedImages as $index => $image) {
-                $safeImage = basename($image);
-                $imagePath = "$imageFolder/" . $safeImage;
-                $thumbnailPath = "$thumbnailsFolder/" . $safeImage;
-                $originalIndex = array_search($image, $categoryImages);
-                $originalIndex = $originalIndex !== false ? (int)$originalIndex : 0;
+<?php
+// (8) Display images grouped by category
+if (empty($groupedData)) {
+    echo "<p>No images found.</p>";
+} else {
+    foreach ($groupedData as $catName => $images) {
+        $total = count($images);
 
-                echo "<div>
-                        <img src='" . htmlspecialchars($thumbnailPath, ENT_QUOTES, 'UTF-8') . "' alt='" . htmlspecialchars($safeImage, ENT_QUOTES, 'UTF-8') . "' class='thumbnail' data-model='" . htmlspecialchars($categoryName, ENT_QUOTES, 'UTF-8') . "' data-index='$originalIndex' onclick='openModal(this)' loading='lazy'>
-                      </div>";
-            }
-            echo "</div>";
+        // Limit to 8 most recent images (already sorted DESC by query)
+        // The query "ORDER BY c.name, i.id DESC" sorts by category, then i.id descending.
+        // The first element in $images is the most recent (index 0).
+        $limited = array_slice($images, 0, 8);
+
+        // Make the category name clickable
+        echo "<h2>
+                <a href='model-detail.php?model=" . urlencode($catName) . "'>
+                    Category: " . htmlspecialchars($catName) . " (Total: $total)
+                </a>
+              </h2>";
+
+        echo "<div class='gallery'>";
+        // Display only the "limited" portion
+        foreach ($limited as $index => $imgRow) {
+            $imageId   = (int)$imgRow['image_id'];
+            $fileName  = $imgRow['file_name'];
+            $likeCount = (int)$imgRow['total_likes'];
+
+            // Thumbnail path
+            $thumbPath = $thumbnailsFolder . '/' . $fileName;
+
+            // The modal expects data-model and data-index
+            echo "<div class='image-item'>
+                    <img
+                        src='" . htmlspecialchars($thumbPath, ENT_QUOTES) . "'
+                        alt='" . htmlspecialchars($fileName, ENT_QUOTES) . "'
+                        data-model='" . htmlspecialchars($catName, ENT_QUOTES) . "'
+                        data-index='$index'
+                        onclick='openModal(this)'
+                        loading='lazy'
+                    />
+
+                    <div class='like-container'>
+                        <button onclick='handleLike($imageId)'>Like</button>
+                        <span id='like-count-$imageId'>$likeCount</span> Likes
+                    </div>
+                  </div>";
         }
-        echo "<a href='index.php' class='back-link'>Back to Home</a>";
-    } else {
-        echo "<p>No models available in the database.</p>";
+        echo "</div>";
     }
-    ?>
+}
+?>
 
-    <?php include('modal.php'); ?>
+<!-- Navigation link or similar -->
+<a href="index.php" class="back-link">Back to Home</a>
 
-    <script>
-        const groupedImages = <?php echo json_encode($groupedImages, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-    </script>
-</body> 
+<!-- (9) Include the advanced modal (zoom, drag, pinch, download, navigation) -->
+<?php include('modal.php'); ?>
+
+<!-- (10) Declare the groupedImages JS variable -->
+<script>
+const groupedImages = <?= json_encode($groupedImages, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+/**
+ * AJAX Like Function
+ */
+function handleLike(imageId) {
+    fetch('like.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_id: imageId })
+    })
+    .then(resp => resp.json())
+    .then(data => {
+        if (data.success) {
+            const span = document.getElementById('like-count-' + imageId);
+            if (span) {
+                span.innerText = data.likes;
+            }
+        } else {
+            alert(data.message || 'Error while liking.');
+        }
+    })
+    .catch(err => console.error('AJAX Like Error:', err));
+}
+</script>
+
+</body>
 </html>

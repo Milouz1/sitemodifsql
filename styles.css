@@ -2,7 +2,6 @@
    1. Variables CSS
    ======================== */
 :root {
-    /* Palette de couleurs */
     --background-color: #121212;
     --text-color: #e0e0e0;
     --primary-color: #1db954;
@@ -21,7 +20,7 @@
 
     /* Espacements */
     --spacing-small: 8px;
-    --spacing-medium: 5px; /* Espacement réduit */
+    --spacing-medium: 5px;
     --spacing-large: 24px;
 
     /* Ombres */
@@ -108,30 +107,50 @@ header {
 /* ========================
    4. Galerie d'Images
    ======================== */
+/*
+   - 8 colonnes par défaut (écrans >= 1200px par ex.)
+   - Sur résolutions plus petites, on ajuste via media queries
+*/
 .gallery {
     display: grid;
-    grid-template-columns: repeat(8, 1fr); /* 8 colonnes fixes */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ajuste dynamiquement */
     gap: var(--spacing-medium);
     justify-items: center;
     margin-top: var(--spacing-large);
     max-width: 100%;
 }
 
+.image-item {
+    width: 100%; /* Permet aux images de prendre toute la place disponible */
+    max-width: 350px; /* Fixe une taille max pour éviter qu'elles soient trop grandes */
+    text-align: center;
+}
+
 .gallery img {
     width: 100%;
-    max-width: 300px;
-    height: auto;
+    max-width: 100%;
+    height: auto; /* Supprime la hauteur fixe pour ne pas déformer */
+    object-fit: contain; /* Affiche l’image entière sans rognage */
     border: 3px solid var(--border-color);
     border-radius: 12px;
     box-shadow: var(--box-shadow);
     transition: transform 0.3s ease, border-color 0.3s ease;
     cursor: pointer;
-    object-fit: cover;
 }
 
 .gallery img:hover {
     transform: scale(1.05);
     border-color: var(--primary-color);
+}
+
+/* Responsive pour que les images soient bien grandes sur mobile */
+@media screen and (max-width: 992px) {
+    .gallery {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Plus petit sur mobile */
+    }
+    .image-item {
+        max-width: 280px; /* Adapté aux petits écrans */
+    }
 }
 
 /* ========================
@@ -260,63 +279,39 @@ a:focus, button:focus, .close:focus, .nav-arrow:focus {
    9. Responsive Design
    ======================== */
 
-/* Très grands écrans (min-width: 2000px) */
+/* Très grands écrans (≥ 2000px) : on peut conserver 8 colonnes
+   ou passer à repeat(10, 1fr) si on veut encore plus de colonnes */
 @media screen and (min-width: 2000px) {
     .gallery {
         grid-template-columns: repeat(8, 1fr);
     }
-    .gallery img {
-        max-width: 400px;
-    }
 }
 
-/* Écrans larges (1600px à 1999px) */
+/* Grands écrans (1600px à 1999px) : 8 colonnes */
 @media screen and (min-width: 1600px) and (max-width: 1999px) {
     .gallery {
         grid-template-columns: repeat(8, 1fr);
     }
-    .gallery img {
-        max-width: 350px;
-    }
 }
 
-/* Écrans moyens (1200px à 1599px) */
-@media screen and (min-width: 1200px) and (max-width: 1599px) {
-    .gallery {
-        grid-template-columns: repeat(8, 1fr);
-    }
-    .gallery img {
-        max-width: 300px;
-    }
-}
-
-/* Écrans petits (992px à 1199px) */
-@media screen and (min-width: 992px) and (max-width: 1199px) {
+/* Écrans moyens (992px à 1599px) : par exemple 6 colonnes */
+@media screen and (min-width: 992px) and (max-width: 1599px) {
     .gallery {
         grid-template-columns: repeat(6, 1fr);
     }
-    .gallery img {
-        max-width: 300px;
-    }
 }
 
-/* Écrans encore plus petits (768px à 991px) */
+/* Écrans plus petits (768px à 991px) : 4 colonnes */
 @media screen and (min-width: 768px) and (max-width: 991px) {
     .gallery {
         grid-template-columns: repeat(4, 1fr);
     }
-    .gallery img {
-        max-width: 350px;
-    }
 }
 
-/* Écrans très petits (moins de 768px) */
+/* Écrans très petits (moins de 768px) : 2 colonnes */
 @media screen and (max-width: 767px) {
     .gallery {
         grid-template-columns: repeat(2, 1fr);
-    }
-    .gallery img {
-        max-width: 150px;
     }
     body {
         padding: var(--spacing-small);
@@ -333,8 +328,8 @@ a:focus, button:focus, .close:focus, .nav-arrow:focus {
     }
     .nav-arrow {
         font-size: 2.5rem;
-        top: 50%;                     /* Centrage vertical */
-        transform: translateY(-50%);  /* Centrage vertical précis */
+        top: 50%;
+        transform: translateY(-50%);
     }
     .prev {
         left: 5%;
@@ -349,6 +344,7 @@ a:focus, button:focus, .close:focus, .nav-arrow:focus {
         font-size: 1rem;
     }
 }
+
 /* ========================
    10. Boutons de Like
    ======================== */
@@ -382,4 +378,45 @@ a:focus, button:focus, .close:focus, .nav-arrow:focus {
     font-size: 1rem;
     margin-top: var(--spacing-small);
     color: var(--text-color);
+}
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Plus grandes colonnes */
+    gap: var(--spacing-medium);
+    justify-items: center;
+    margin-top: var(--spacing-large);
+    max-width: 100%;
+}
+
+.image-item {
+    width: 100%;
+    max-width: 400px; /* Agrandir les images */
+    text-align: center;
+}
+
+.gallery img {
+    width: 100% !important; /* Force la largeur max */
+    max-width: 100% !important;
+    height: auto !important; /* Ajustement automatique */
+    object-fit: cover !important;
+    border: 3px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.gallery img:hover {
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+}
+
+/* ✅ Responsive : s'adapte sur mobile */
+@media screen and (max-width: 992px) {
+    .gallery {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Plus grand sur mobile */
+    }
+    .image-item {
+        max-width: 320px;
+    }
 }

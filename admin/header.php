@@ -79,8 +79,9 @@ if (!in_array('administrator', $current_user->roles)) {
         <nav>
             <a href="index.php"><i class="fas fa-home"></i> Dashboard</a>
             <a href="waiting.php"><i class="fas fa-clock"></i> Images en attente</a>
-            <a href="users.php"><i class="fas fa-users"></i> Utilisateurs</a>
-            <a href="settings.php"><i class="fas fa-cog"></i> Paramètres</a>
+            <a href="verify-thumbnails.php"><i class="fas fa-users"></i> Creation thumbnails</a>
+            <a href="likes_by_category.php"><i class="fas fa-cog"></i> Likes</a>
+			<a href="visits.php"><i class="fas fa-cog"></i> visites</a>
         </nav>
         <div class="user-info">
             Connecté en tant que : <strong><?= esc_html($current_user->display_name); ?></strong>

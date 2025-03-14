@@ -1,11 +1,12 @@
 <?php
 include('header.php');
 require '../db_config.php'; // Connexion à la base de données
+
 $waitingDir = __DIR__ . '/../images/waiting/';
-$targetDir = __DIR__ . '/../images/';
+$targetDir  = __DIR__ . '/../images/';
 $thumbnailsDir = __DIR__ . '/../images/thumbnails/';
 
-// Vérification des images dans le dossier `waiting`
+// Vérification des images dans le dossier waiting
 $waitingImages = array_diff(scandir($waitingDir), ['.', '..']);
 
 // Récupération des catégories depuis SQL
@@ -16,7 +17,9 @@ try {
     die("Erreur SQL : " . $e->getMessage());
 }
 
-// Ajouter une nouvelle catégorie
+/**
+ * 1) Ajouter une nouvelle catégorie
+ */
 if (isset($_POST['new_category'])) {
     $newCategory = trim($_POST['new_category']);
     try {
@@ -30,7 +33,9 @@ if (isset($_POST['new_category'])) {
     exit;
 }
 
-// Renommer une catégorie
+/**
+ * 2) Renommer une catégorie
+ */
 if (isset($_POST['modify_category'], $_POST['old_category'], $_POST['new_category_name'])) {
     $oldCategory = $_POST['old_category'];
     $newCategory = trim($_POST['new_category_name']);
@@ -45,39 +50,50 @@ if (isset($_POST['modify_category'], $_POST['old_category'], $_POST['new_categor
     exit;
 }
 
-// Supprimer une image ou la déplacer vers waiting
+/**
+ * 3) Supprimer une image ou la déplacer vers waiting
+ */
 if (isset($_POST['delete_image'])) {
-    $imageToDelete = $_POST['delete_image'];
-    $imagePath = $targetDir . $imageToDelete;
-    $thumbnailPath = $thumbnailsDir . $imageToDelete;
+    $imageToDelete   = $_POST['delete_image'];
+    $imagePath       = $targetDir . $imageToDelete;
+    $thumbnailPath   = $thumbnailsDir . $imageToDelete;
 
-    if (file_exists($imagePath)) unlink($imagePath);
-    if (file_exists($thumbnailPath)) unlink($thumbnailPath);
+    if (file_exists($imagePath)) {
+        unlink($imagePath);
+    }
+    if (file_exists($thumbnailPath)) {
+        unlink($thumbnailPath);
+    }
 
     $stmt = $pdo->prepare("DELETE FROM images WHERE file_name = :file_name");
     $stmt->execute(['file_name' => $imageToDelete]);
 
     $message = "L'image '$imageToDelete' a été supprimée.";
-    header("Location: index.php?category=" . urlencode($_GET['category']) . "&message=" . urlencode($message));
+    header("Location: index.php?category=" . urlencode($_GET['category'] ?? '') . "&message=" . urlencode($message));
     exit;
 }
 
 if (isset($_POST['move_to_waiting'])) {
-    $imageToMove = $_POST['move_to_waiting'];
-    $imagePath = $targetDir . $imageToMove;
+    $imageToMove     = $_POST['move_to_waiting'];
+    $imagePath       = $targetDir . $imageToMove;
     $destinationPath = $waitingDir . $imageToMove;
 
-    if (file_exists($imagePath)) rename($imagePath, $destinationPath);
+    if (file_exists($imagePath)) {
+        rename($imagePath, $destinationPath);
+    }
 
+    // Supprime la référence dans la table images
     $stmt = $pdo->prepare("DELETE FROM images WHERE file_name = :file_name");
     $stmt->execute(['file_name' => $imageToMove]);
 
     $message = "L'image '$imageToMove' a été déplacée vers 'waiting'.";
-    header("Location: index.php?category=" . urlencode($_GET['category']) . "&message=" . urlencode($message));
+    header("Location: index.php?category=" . urlencode($_GET['category'] ?? '') . "&message=" . urlencode($message));
     exit;
 }
 
-// Afficher les images d'une catégorie
+/**
+ * 4) Afficher les images d'une catégorie
+ */
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : null;
 $imagesInCategory = [];
 if ($selectedCategory) {
@@ -154,6 +170,10 @@ if ($selectedCategory) {
             height: auto;
             margin-bottom: 10px;
         }
+        .delete-category-form {
+            display: inline-block;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -184,15 +204,115 @@ if ($selectedCategory) {
                 <span><?= htmlspecialchars($category); ?></span>
                 <div>
                     <a href="index.php?category=<?= urlencode($category); ?>">Voir</a>
+                    <!-- Formulaire de renommage -->
                     <form method="POST" style="display:inline;">
                         <input type="hidden" name="old_category" value="<?= htmlspecialchars($category); ?>">
                         <input type="text" name="new_category_name" placeholder="Nouveau nom" required>
                         <button type="submit" name="modify_category">Renommer</button>
                     </form>
+
+                    <!-- Bouton "Supprimer la catégorie" =>
+                         On affiche un formulaire avec un input hidden "category_to_delete"
+                         On ne supprime pas direct, on fait un second step
+                    -->
+                    <form method="POST" class="delete-category-form">
+                        <input type="hidden" name="category_to_delete" value="<?= htmlspecialchars($category); ?>">
+                        <button type="submit">Supprimer</button>
+                    </form>
                 </div>
             </li>
         <?php endforeach; ?>
     </ul>
+
+    <?php
+    /**
+     * 5) Étape : l'utilisateur a cliqué sur "Supprimer" à côté d'une catégorie
+     *    => on affiche un mini-form pour choisir "supprimer les images" ou "déplacer en waiting"
+     */
+    if (isset($_POST['category_to_delete']) && !isset($_POST['confirm_delete_category'])) {
+        $catToDelete = $_POST['category_to_delete'];
+        echo "<h3>Supprimer la catégorie : " . htmlspecialchars($catToDelete) . "</h3>";
+        echo "<p>Que souhaitez-vous faire des images associées ?</p>";
+        ?>
+        <form method="POST">
+            <input type="hidden" name="confirm_delete_category" value="1">
+            <input type="hidden" name="cat_name" value="<?= htmlspecialchars($catToDelete); ?>">
+
+            <label>
+                <input type="radio" name="action_images" value="delete" checked>
+                Supprimer définitivement les images
+            </label><br>
+            <label>
+                <input type="radio" name="action_images" value="waiting">
+                Déplacer les images dans le dossier "waiting"
+            </label><br><br>
+
+            <button type="submit">Confirmer</button>
+        </form>
+        <?php
+    }
+
+    /**
+     * 6) Traitement final : on sait quelle catégorie est à supprimer, et quelle action faire sur les images
+     */
+    if (isset($_POST['confirm_delete_category'], $_POST['cat_name'], $_POST['action_images'])) {
+        $catName = $_POST['cat_name'];
+        $action  = $_POST['action_images'];
+
+        // Récupérer toutes les images de cette catégorie
+        $stmt = $pdo->prepare("
+            SELECT i.file_name
+            FROM images i
+            INNER JOIN categories c ON i.category_id = c.id
+            WHERE c.name = :catName
+        ");
+        $stmt->execute(['catName' => $catName]);
+        $files = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if ($action === 'delete') {
+            // Supprimer les fichiers + vignettes + la table images
+            foreach ($files as $file) {
+                $path = $targetDir . $file;
+                $thumb = $thumbnailsDir . $file;
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+                if (file_exists($thumb)) {
+                    unlink($thumb);
+                }
+                // Supprimer la ligne dans images
+                $delStmt = $pdo->prepare("DELETE FROM images WHERE file_name = :f");
+                $delStmt->execute(['f' => $file]);
+            }
+        } elseif ($action === 'waiting') {
+            // Déplacer dans waiting + supprimer de la table images
+            foreach ($files as $file) {
+                $path = $targetDir . $file;
+                $thumb = $thumbnailsDir . $file;
+                $dest = $waitingDir . $file;
+
+                if (file_exists($path)) {
+                    rename($path, $dest);
+                }
+                // Optionnel : on peut aussi supprimer les thumbnails si on veut
+                if (file_exists($thumb)) {
+                    unlink($thumb);
+                }
+                // enlever la ligne de la table images
+                $delStmt = $pdo->prepare("DELETE FROM images WHERE file_name = :f");
+                $delStmt->execute(['f' => $file]);
+            }
+        }
+
+        // Supprimer la catégorie elle-même
+        $delCatStmt = $pdo->prepare("DELETE FROM categories WHERE name = :name");
+        $delCatStmt->execute(['name' => $catName]);
+
+        $msg = "La catégorie '$catName' a été supprimée.";
+        header("Location: index.php?message=" . urlencode($msg));
+        exit;
+    }
+    ?>
 
     <?php if ($selectedCategory): ?>
         <h2>Images de la catégorie : <?= htmlspecialchars($selectedCategory); ?></h2>

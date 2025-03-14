@@ -202,7 +202,7 @@ ksort($groupedImages, SORT_NATURAL | SORT_FLAG_CASE);
     </style>
 </head>
 <body>
-    <h1>Galerie d'Images par Modèle</h1>
+    <h1>Image gallery by model</h1>
     <div class="content">
         <div class="model-container">
             <?php if (!empty($groupedImages)): ?>
@@ -238,7 +238,7 @@ ksort($groupedImages, SORT_NATURAL | SORT_FLAG_CASE);
         </div>
 
         <div style="text-align: center;">
-            <a href="index.php" class="back-link">Retour à l'Accueil</a>
+            <a href="index.php" class="back-link">Back to Home</a>
         </div>
     </div>
 </body>

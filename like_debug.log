@@ -1,0 +1,96 @@
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":44}
+Validated image_id: 44, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":44}
+Validated image_id: 44, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":44}
+Validated image_id: 44, user_ip: 172.71.122.156
+Error in like.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_ip' in 'where clause'
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.123.193
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.123.194
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.123.193
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":19}
+Validated image_id: 19, user_ip: 172.71.123.194
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 141.101.95.95
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":18}
+Validated image_id: 18, user_ip: 141.101.95.94
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":106}
+Validated image_id: 106, user_ip: 172.69.223.45
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value
+Request received
+Request data: {"image_id":107}
+Validated image_id: 107, user_ip: 141.101.97.47
+Error in like.php: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value

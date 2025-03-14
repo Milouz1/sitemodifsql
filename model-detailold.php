@@ -1,6 +1,4 @@
 <?php
-// model_detail.php
-
 // (1) Check access (if needed)
 include('access-test.php');
 
@@ -20,18 +18,18 @@ if ($modelSelected === '') {
     die('<p>Error: No model specified.</p>');
 }
 
-// (6) Fetch the images + likes for the given model, ordered by date
+// (6) Fetch the images + likes for the given model
 try {
+    // Retrieve ID, file name, and total likes
     $sql = "
         SELECT 
-            DATE(i.created_at) AS upload_date,
             i.id AS image_id,
             i.file_name,
             (SELECT COUNT(*) FROM image_likes WHERE image_id = i.id) AS total_likes
         FROM images i
         INNER JOIN categories c ON i.category_id = c.id
         WHERE c.name = :modelName
-        ORDER BY i.created_at DESC
+        ORDER BY i.id DESC
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['modelName' => $modelSelected]);
@@ -41,24 +39,21 @@ try {
     die('<p>DB Error: ' . htmlspecialchars($e->getMessage()) . '</p>');
 }
 
-// (7) Regrouper par date
-$imagesByDate = [];
-foreach ($allImages as $row) {
-    $date = $row['upload_date'];
-    if (!isset($imagesByDate[$date])) {
-        $imagesByDate[$date] = [];
-    }
-    $imagesByDate[$date][] = $row;
-}
+// (7) Total number of images
+$totalImages = count($allImages);
 
-// (8) Construire un tableau linéaire pour le modal
-$groupedImages = [$modelSelected => []];
+// (8) Build the $groupedImages array for the modal
+//     Expected structure for modal.php: groupedImages[modelName] = [ list of file names... ]
+//     Or, if your modal.php just expects an array of file_name, we’ll store it accordingly.
+$groupedImages = [
+    $modelSelected => []
+];
+
+// Loop to fill $groupedImages[$modelSelected]
 foreach ($allImages as $img) {
+    // We only store the file_name, because modal.php uses "modelImages[currentIndex]" = file name
     $groupedImages[$modelSelected][] = $img['file_name'];
 }
-
-// (9) Calculer le total d’images
-$totalImages = count($allImages);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,52 +69,45 @@ $totalImages = count($allImages);
 <?php if ($totalImages === 0): ?>
     <p>No images available for this model.</p>
 <?php else: ?>
-    <?php
-    // (A) On initialise un compteur global pour les indices
-    $globalIndex = 0;
-    ?>
+    <!-- (9) Image gallery -->
+    <div class="gallery">
+    <?php 
+    // Reuse $allImages for display
+    foreach ($allImages as $index => $row) {
+        $imageId   = (int)$row['image_id'];
+        $fileName  = $row['file_name'];
+        $likeCount = (int)$row['total_likes'];
 
-    <?php foreach ($imagesByDate as $date => $rows): ?>
-        <h2 class="date-title"><?= htmlspecialchars($date) ?></h2>
-        <div class="gallery">
-            <?php foreach ($rows as $row): 
-                $imageId   = (int)$row['image_id'];
-                $fileName  = $row['file_name'];
-                $likeCount = (int)$row['total_likes'];
+        // Construct the thumbnail path
+        $thumbPath = $thumbnailsFolder . '/' . $fileName;
+        // We'll set "data-model" and "data-index" for the modal
+        ?>
+        <div class="image-item">
+            <img 
+                src="<?= htmlspecialchars($thumbPath) ?>" 
+                alt="<?= htmlspecialchars($fileName) ?>"
+                data-model="<?= htmlspecialchars($modelSelected) ?>"
+                data-index="<?= $index ?>"
+                onclick="openModal(this)"
+                loading="lazy"
+            >
 
-                // Chemin de la miniature
-                $thumbPath = $thumbnailsFolder . '/' . $fileName;
-            ?>
-                <div class="image-item">
-                    <img 
-                        src="<?= htmlspecialchars($thumbPath) ?>" 
-                        alt="<?= htmlspecialchars($fileName) ?>"
-                        data-model="<?= htmlspecialchars($modelSelected) ?>"
-                        data-index="<?= $globalIndex ?>"
-                        onclick="openModal(this)"
-                        loading="lazy"
-                    >
-                    <div class="like-container">
-                        <button onclick="handleLike(<?= $imageId ?>)">Like</button>
-                        <span id="like-count-<?= $imageId ?>"><?= $likeCount ?></span> Likes
-                    </div>
-                </div>
-
-                <?php 
-                // Incrémentation de l'index global après chaque image
-                $globalIndex++;
-                ?>
-            <?php endforeach; ?>
+            <!-- Like button + counter -->
+            <div class="like-container">
+                <button onclick="handleLike(<?= $imageId ?>)">Like</button>
+                <span id="like-count-<?= $imageId ?>"><?= $likeCount ?></span> Likes
+            </div>
         </div>
-    <?php endforeach; ?>
+    <?php } ?>
+    </div>
 <?php endif; ?>
 
 <a href="index.php" class="back-link">Back to Home</a>
 
-<!-- (10) Include the modal -->
+<!-- (10) Include the modal WITH the full script -->
 <?php include('modal.php'); ?>
 
-<!-- (11) Define the JS object for the modal -->
+<!-- (11) Define the JavaScript object groupedImages for the modal -->
 <script>
 const groupedImages = <?= json_encode($groupedImages, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
@@ -135,6 +123,7 @@ function handleLike(imageId) {
     .then(resp => resp.json())
     .then(data => {
         if (data.success) {
+            // Update the <span id="like-count-N">
             const span = document.getElementById('like-count-' + imageId);
             if (span) {
                 span.innerText = data.likes;
